@@ -1,0 +1,196 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.61 [en] (OS/2; U) [Netscape]">
+   <meta name="Author" content="Sant Coetzer">
+   <meta name="KeyWords" content="SkeduloSkope OS/2 OS2 scheduler scheduling priority expo exposition demo demonstration source code">
+   <title>SkeduloSkope V0.7&szlig; Readme</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#FF0000" vlink="#800080" alink="#0000FF">
+
+<center>
+<h1>
+<img SRC="SkeduloSkope.png" ALT="SkeduloSkopeLogo" height=61 width=324 align=CENTER>
+V0.7&szlig;</h1></center>
+
+<center><font color="#CC33CC"><font size=-1>Massively multithreaded</font></font>
+<br><b><font face="Helvetica, Arial, sans-serif"><font color="#CC33CC"><font size=+0>OS/2
+Scheduler in action</font></font></font></b>
+<br><font color="#CC33CC"><font size=+2>exhibitor for developers.</font></font></center>
+
+<p>Note: This project is far from complete, for various reasons but primarily
+because I have been unable yet to resolve certain behaviours of the OS/2
+Control Program API. The source code is commented with the problems, and
+any constructive input is <a href="mailto:sant@OS2World.com" alt="mailto:sant@OS2World.com">welcome</a>.
+<p>OS/2 is about multitasking and it does it incomparably better than you
+know what <i>and</i>&nbsp; Linux. OS/2 is also about multithreading, which
+is much of a likeness, but still different.&nbsp;<img SRC="SkeduloSkope16.png" ALT="SkeduloSkope" height=16 width=85 align=CENTER>
+started as a little hack to investigate why processes whose priority I
+boosted with the ReNice add-on for Watchcat, still failed to run as expected.
+And also because I saw some documentation from a normally impeccable source
+that was obviously wrong, but I wouldn't have wanted to challenge without
+solid proof to the contrary ! As it grew I discovered more subtleties of
+the scheduler until it became&nbsp; a very instructive mini-app. While
+a single instance gives good insight into inter-thread scheduling, to gain
+insight into inter-process scheduling one needs to run 2 or 3 instances
+simultaneously.
+<p><img SRC="../../images/Slidbar.Gif" ALT="Sliding bar" height=2 width=98%>
+<p><img SRC="../../images/dot.gif" ALT="!" height=14 width=14><u><font size=+2>Warnings:</font></u>
+<br><img SRC="SkeduloSkope20.png" ALT="Skeduloskope" height=20 width=104 align=CENTER>
+does not perform any undocumented "tricks" so it should run without causing
+any damage to your system. However, it does <i>unusual</i> things. Like
+running more than a thousand threads; like running a large number of Time
+Critical threads. Do not even think of running it if you are also running
+some application that needs regular access to the CPU, like writing a CD
+or running your pet heart-lung machine. It has often hung itself in development
+on my system but never interfered with other apps I might have had running.
+Nevertheless, before you first start it, as you should do with any new
+app you run anyway, make sure all your work is saved first in case you
+have to reboot. Use a small value for the first parameter until you know
+what effect it has. OS/2 will <b>not</b> respond to <b>any</b> keys, not
+even PAUSE, ^C, C-A-D or WatchCat keys while running TimeCritical threads
+(at least not any time soon). So if you enter large values on a slow machine,
+you might need to press hardware reset, cycle the power or <i>go shopping
+!!</i> of course.
+<br>It may happen, why I cannot tell, but suspect the scheduler code (because
+a similar thing can happen with just any other old app) that the program
+will just hang sometimes, hundreds of threads scheduled but the system
+won't let them run. This won't interfere with your system (apart from using
+up your available threads) but it cannot be killed except by reboot.
+<p><u>This is why it's &szlig;eta:</u> In the 160x38 mode, some priority
+levels, apparently random but always the same on my machine, will hang
+the app. If you look at the screen when it is ready to run, you'll see
+some "teeth missing" from the display, and if you inspect the source code
+you'll see IF statements to prevent those particular priority levels from
+using the display. If you know what causes this behaviour and how I can
+get it fixed, please let me know.
+<p><img SRC="../../images/dot.gif" ALT="!" ><u><font size=+2> Warnings for more serious
+implementers:</font></u>
+<br>Running better than the default 80x25 "mode",&nbsp; especially running
+several instances, allows one to get a better feel for the scheduler, but
+many a Config.SYS will not allow you sufficient threads. This is fixed
+by changing the THREADS= line in your Config.SYS. I believe the default
+is 1024 but see what yours is first and REM it to remember what it was
+should you want to go back before entering a new value. <b><font color="#990000">Ensure
+you can start your system with stiffies/maintenance partition/bootable
+CD/or any other alternative means <i>before</i> you fiddle with your THREADS=
+line. TIP: When you next reboot your system, press Alt-F1 when booting
+starts, then F2 to see if </font></b>\OS2\BOOT\Config.X&nbsp;<b><font color="#990000">
+still boots your system.</font> If it does not, you can copy your current
+<i>working</i>
+Config.SYS over there.</b>
+<p>The MAXWAIT= line also affects scheduling; The value is given in seconds
+(default=3) which is fair for a slow 386 but the minimum, 1, is hardly
+appropriate for today's machines. While watching the display for <b>FS</b>
+and <b>Reg</b> threads you will notice they all run a little, periodically;
+the period is what you specify for MAXWAIT here. TIP: You might as well
+change permanently to MAXWAIT=1 unless you're running an i386.
+<p>My system has THREADS=1312 so it is likely yours will handle that too,
+but beware, specifying too large a number will use up GDTs that other parts
+of the system need. When you boot with too large a number for THREADS=,
+you'll see messages from many device drivers not being able to load. Don't
+keep on pressing enter, your system won't run. Press C-A-D, restart from
+your alternative means and tedit config.sys to reduce the number. When
+you are through with&nbsp;<img SRC="SkeduloSkope16.png" height=16 width=85 align=ABSCENTER>,
+it may be a good idea to reduce your THREADS= setting to something like
+512 or 384. Even power-users hardly ever have more than 200 threads going
+at once and it does use up a limited resource, GDTs (Global Descriptor
+Table entries, to be precise) as well as address space (would you believe
+it, 4GB and we're running short !) as well as just plain old RAM.
+<p><img SRC="../../images/Bluebar.png" ALT="Blue Bar" height=18 width=100%>
+<p><u><font size=+2>The parameters</font></u>
+<p><font size=+2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+e.g.&nbsp;&nbsp;&nbsp; "SkeduloSkope 1000 2000"</font>
+<p>There are two, both integer numbers from 0 to 2<sup>31</sup> ( but realistically,
+no more than about 1 000 000 ).
+<p>There are two distinct categories of priorities under OS/2:
+<ol>
+<li>
+&nbsp;The TimeCritical and the Idle classes share the characteristic that
+there are no priority boosts; thus a TC+3 thread will not get <i>any</i>
+CPU while there are "ready" TC+4 and better threads.</li>
+
+<li>
+The ForegroundServer and Regular classes use a complex algorithm to determine
+who should run. For this reason, one would want a small number for the
+first category (they run in a simple order from top to bottom) so that
+it runs quickly;To adequately observe the other two classes though, one
+would want a large number so that they run for longer.</li>
+</ol>
+The numbers and the period of observation they afford are of course directly
+related to CPU speed. So for a 386SX16 !! you would probably not want to
+go beyond 200 800 for a start; On your new GHz Athlon those numbers will
+get you only a few seconds worth of display, so try 2000 5000 at first
+and perhaps 1000 20000 later to see the priority boosts.
+<p><u><font size=+2>The program</font></u>
+<br>What it does is to start some threads at all the possible priority
+levels and then to display them running for your observation. Three "modes"
+are supported: Normal 80x25 VIO window size (will also run F.S.), 160x20+
+and 160x37+. In the 80x25 mode, 256 threads (two per level) is started
+and prepared "ready to run" and blocked on an event semaphore which gets
+posted as soon as you press a key. This pause also gives one the opportunity
+to start more instances of&nbsp;<img SRC="SkeduloSkope16.png" ALT="SkeduloSkope" height=16 width=85 align=ABSCENTER>
+(regardless of <i>their</i> "mode"), which, on detecting a "Master" instance
+already owning the semaphore, will block all it's threads on the same evsem
+so <b><i>all</i></b> the threads of <b><i>all</i></b> the instances eventually
+start together, provided you don't start the master before all the slaves
+are ready. The 160x20 mode uses 3 threads per priority level (and more
+significant digits) to afford a more detailed display. The 160x37 mode
+use 6 threads per priority level, but it is <i>kludged</i> not to hang.
+<br>Each thread (and thus priority level) has a given place on the display
+where it displays it's diminishing number when it has the CPU. The space
+is labeled with the priority e.g. R07 indicates regular+7. There are also
+a few help screens when the program is run without parameters.
+<br>Thread MetaCode follows:
+<center><table BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH="180" BGCOLOR="#CCFFFF" >
+<caption><tbody></tbody></caption>
+
+<tr>
+<th ALIGN=LEFT>&nbsp; REPEAT</th>
+</tr>
+
+<tr>
+<th ALIGN=LEFT VALIGN=CENTER>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+GotoXY(X,Y) ;</th>
+</tr>
+
+<tr>
+<th ALIGN=LEFT VALIGN=CENTER>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Write(N);</th>
+</tr>
+
+<tr>
+<th ALIGN=LEFT VALIGN=CENTER>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+DEC(N);</th>
+</tr>
+
+<tr>
+<th ALIGN=LEFT VALIGN=CENTER>&nbsp; UNTIL N&lt;0;</th>
+</tr>
+</table></center>
+
+<p><img SRC="../../images/Bluebar.png" ALT="Blue Bar" height=18 width=100%>
+<p>Here is the full package <a href="SkeduloSkope-0.7.zip">SkeduloSkope-0.7.zip(37k)</a>,&nbsp;
+or&nbsp; the source code <a href="SkeduloSkope.pas">SkeduloSkope.PAS(14k)</a>&nbsp;
+or&nbsp; <a href="SkeduloSkope.pas.gz">SkeduloSkope.pas.gz(5k)</a> or download
+the binary <a href="SkeduloSkope.exe">SkeduloSkope.EXE(28k)</a> to your
+Desktop and run it for an intro.
+<br><a href="SkeduloSkopeD.png">Here is a screenshot(54k) of 1152 threads
+in three processes ready to run.</a> The display was 1024x768x16 and each
+individual VIO window is in 160x21 mode with a font size of 10x6. If you
+have 4OS2, there is <a href="LP.CMD">LP.CMD</a> , <a href="LP1.CMD">LP1.CMD</a>
+, <a href="LP2.CMD">LP2.CMD</a> and <a href="LP3.CMD">LP3.CMD</a> to duplicate
+this for you.
+<br><img SRC="../../images/Bluebar.png" ALT="Blue Bar" height=18 width=100%>
+<br><a href="../../index.html"><img SRC="../../images/home20.GIF" BORDER=0 height=40 width=80></a>
+<!--WEBBOT bot="HTMLMarkup" startspan ALT="Site Meter" -->
+<script type="text/javascript" language="JavaScript">var site="s13opstal"</script>
+<script type="text/javascript" language="JavaScript1.2" src="http://s13.sitemeter.com/js/counter.js?site=s13opstal"></script>
+<noscript><a href="http://s13.sitemeter.com/stats.asp?site=s13opstal" target="_top">
+<img src="http://s13.sitemeter.com/meter.asp?site=s13opstal" alt="Site Meter" border=0></a></noscript>
+<!-- Copyright (c)2002 Site Meter -->
+<!--WEBBOT bot="HTMLMarkup" Endspan -->
+<br>Last modified 2002 May 06
+</body>
+</html>
